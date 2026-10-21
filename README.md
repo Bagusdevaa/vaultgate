@@ -1,4 +1,4 @@
-# vault-rag
+# vaultgate
 
 Retrieval over an Obsidian vault: hybrid search (bge-m3 dense + sparse in Qdrant), one-hop
 expansion through the vault's own wikilinks, and a Jev relevance gate (OpenRouter Decisions API) that abstains when the
