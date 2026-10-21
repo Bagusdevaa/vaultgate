@@ -31,7 +31,7 @@ The instructor explicitly asked to highlight the retrieval features. The inspect
 | Embedding | `BAAI/bge-m3`, self-hosted | Dense + sparse from one model (FlagEmbedding). Open source. |
 | Vector DB | Qdrant | Local mode during dev, Docker on home server for deploy. Dense + sparse in one collection, server-side RRF fusion. |
 | Graph | NetworkX | Built from wikilinks, backlinks. |
-| Gate (main) | Jev via `jev-reranker` | API key in `.env` as `JEV_API_KEY`. |
+| Gate (main) | Jev `typesafe/jev-1.14` via OpenRouter Decisions API | `POST https://openrouter.ai/api/alpha/decisions`. Same `OPENROUTER_API_KEY` as the generator, no TypeSafe account. NOT the chat completions endpoint. Pin the version, never `jev-latest`. Endpoint is alpha: keep all Jev code inside `gate/jev_gate.py`. |
 | Gate (fallback) | `BAAI/bge-reranker-v2-m3` + threshold | Self-hosted, open source. Same interface as Jev gate. |
 | Generator (experiments) | Qwen open-weights model via OpenRouter | OpenAI-compatible client, temperature 0. Slug in config, never changed mid-experiment. |
 | Judge (experiments) | Non-Qwen model via OpenRouter | Must differ from the generator family. |
@@ -94,7 +94,7 @@ vault-rag/
 
 Tasks:
 - Init repo, `uv`, `.gitignore`, `.env.example`, `config.yaml`.
-- Jev smoke test: one `rerank` call and one filter/gate call with a toy query and 5 toy documents. Log latency and confirm billing/credits status.
+- Jev smoke test via OpenRouter Decisions API (`typesafe/jev-1.14`): read OpenRouter's Jev tutorial and Decisions API reference first. With a toy query and 5 toy documents, send (a) one noul question per document ("Does this passage help answer the query?") in a single packed request, and (b) one sufficiency question over the kept passages. Log per-document probabilities, latency, and token usage/cost.
 - OpenRouter smoke test: one call to the chosen Qwen open-weights model and one to the judge model.
 - bge-m3 smoke test: encode 3 sentences, print dense dim and sparse token count. Report RAM usage.
 
@@ -102,7 +102,7 @@ Acceptance:
 - All three smoke tests pass and are runnable via `make smoke` (or `uv run`).
 - Report: Jev latency, any pricing/rate-limit info found, bge-m3 RAM usage.
 
-STOP: if Jev is blocked (no access, too expensive), switch the main gate to `bge_gate` and keep Jev as optional.
+STOP: if the Decisions API is blocked or its schema is unclear, switch the main gate to `bge_gate` and keep Jev as optional.
 
 ## Phase 1: Demo vault (Oct 21, parallel with golden set work)
 
