@@ -1,0 +1,33 @@
+# Experiment settings. Model slugs are frozen once evaluation starts (PLAN.md, Phase 6).
+
+paths:
+  demo_vault: data/demo-vault
+  golden_dir: data/golden
+
+embedding:
+  model: BAAI/bge-m3
+  use_fp16: false        # fp16 is unreliable on Apple MPS/CPU; revisit on the home server
+  max_length: 8192
+
+llm:
+  base_url: https://openrouter.ai/api/v1
+  generator: qwen/qwen3.6-35b-a3b
+  judge: deepseek/deepseek-v4.1-flash   # must not be a Qwen model
+  temperature: 0
+
+gate:
+  type: jev              # jev | bge | none
+  jev:
+    mode: listwise
+    # Jev has no separate sufficiency call: evidence counts as sufficient when at least
+    # one candidate scores >= threshold with relevance_rerank().
+    threshold: 0.2
+  bge:
+    model: BAAI/bge-reranker-v2-m3
+    threshold: 0.5
+
+retrieval:
+  top_k: 20
+  graph_seed_notes: 5
+  graph_max_neighbors_per_note: 5
+  max_retries: 1
