@@ -854,19 +854,6 @@ wheels = [
 ]
 
 [[package]]
-name = "jev-reranker"
-version = "0.1.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "httpx" },
-    { name = "python-dotenv" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ae/52/276a39e087f73e194bded61512b2fd9ef3dade59688c70c2931283618851/jev_reranker-0.1.2.tar.gz", hash = "sha256:cae0377ea67db71a119fb536fbf0e13cddfc95cd38a43b833a9363e208860b77", size = 86614, upload-time = "2026-09-21T06:26:53.448Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/03/d97071b7eda43d54f49469483f22efefaf8957a15322104e6bc84e6988e6/jev_reranker-0.1.2-py3-none-any.whl", hash = "sha256:55cb9625a3269ca4c61be1e6dea0a0b0a1954bbab9365a7e28ea0502370e3924", size = 31915, upload-time = "2026-09-21T06:26:52.24Z" },
-]
-
-[[package]]
 name = "jinja2"
 version = "3.1.6"
 source = { registry = "https://pypi.org/simple" }
@@ -3188,7 +3175,6 @@ source = { editable = "." }
 dependencies = [
     { name = "flagembedding" },
     { name = "httpx" },
-    { name = "jev-reranker" },
     { name = "openai" },
     { name = "psutil" },
     { name = "python-dotenv" },
@@ -3204,7 +3190,6 @@ dev = [
 requires-dist = [
     { name = "flagembedding", specifier = ">=1.4.2" },
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "jev-reranker", specifier = ">=0.1.2" },
     { name = "openai", specifier = ">=3.35.1" },
     { name = "psutil", specifier = ">=7.2.2" },
     { name = "python-dotenv", specifier = ">=1.2.4" },
