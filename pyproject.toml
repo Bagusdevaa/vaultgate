@@ -1,0 +1,29 @@
+[project]
+name = "vault-rag"
+version = "0.1.0"
+description = "Graph-expanded hybrid RAG with a Jev relevance gate over an Obsidian vault"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flagembedding>=1.4.2",
+    "httpx>=0.28.1",
+    "openai>=3.35.1",
+    "psutil>=7.2.2",
+    "python-dotenv>=1.2.4",
+    "pyyaml>=6.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vault_rag"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

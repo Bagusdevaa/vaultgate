@@ -1,0 +1,41 @@
+# Experiment settings. Model slugs are frozen once evaluation starts (PLAN.md, Phase 6).
+
+paths:
+  demo_vault: data/demo-vault
+  golden_dir: data/golden
+
+embedding:
+  model: BAAI/bge-m3
+  use_fp16: false        # fp16 is unreliable on Apple MPS/CPU; revisit on the home server
+  max_length: 8192
+
+llm:
+  base_url: https://openrouter.ai/api/v1
+  generator: qwen/qwen3.6-35b-a3b
+  judge: deepseek/deepseek-v4.1-flash   # must not be a Qwen model
+  temperature: 0
+  # Qwen3.6 thinks before answering by default; thinking tokens are billed as output
+  # and can use up max_tokens before any answer appears.
+  reasoning: false
+
+gate:
+  type: jev              # jev | bge | none
+  jev:
+    model: typesafe/jev-1.14    # pinned: thresholds are tuned against one version
+    endpoint: https://openrouter.ai/api/alpha/decisions
+    threshold: 0.2              # per-chunk P(helps answer) cutoff
+    # Sufficiency is its own yes/no question over the kept chunks:
+    # P("these chunks are enough to answer") >= this value -> answer, else retry/abstain.
+    sufficiency_threshold: 0.5
+    # Requests above ~32 KB of text switch Jev to its slower, less accurate long-context
+    # mode, so candidate batches stay under this size.
+    max_request_bytes: 30000
+  bge:
+    model: BAAI/bge-reranker-v2-m3
+    threshold: 0.5
+
+retrieval:
+  top_k: 20
+  graph_seed_notes: 5
+  graph_max_neighbors_per_note: 5
+  max_retries: 1
