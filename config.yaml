@@ -19,9 +19,10 @@ gate:
   type: jev              # jev | bge | none
   jev:
     mode: listwise
-    # Jev has no separate sufficiency call: evidence counts as sufficient when at least
-    # one candidate scores >= threshold with relevance_rerank().
-    threshold: 0.2
+    threshold: 0.2              # per-chunk relevance_rerank() cutoff
+    # Jev answers yes/no questions natively, so sufficiency is its own question over the
+    # kept chunks: P("these chunks are enough to answer") >= this value -> answer.
+    sufficiency_threshold: 0.5
   bge:
     model: BAAI/bge-reranker-v2-m3
     threshold: 0.5
