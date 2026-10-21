@@ -4,9 +4,11 @@ import sys
 import time
 
 import psutil
+import torch
 from FlagEmbedding import BGEM3FlagModel
 
 from vault_rag.config import load_config
+from vault_rag.hf import local_model_path
 
 SENTENCES = [
     "Hybrid search combines dense vectors with sparse lexical weights.",
@@ -24,7 +26,7 @@ def main() -> int:
     before = rss_gb()
 
     start = time.perf_counter()
-    model = BGEM3FlagModel(emb["model"], use_fp16=emb["use_fp16"])
+    model = BGEM3FlagModel(local_model_path(emb["model"]), use_fp16=emb["use_fp16"])
     load_seconds = time.perf_counter() - start
     after_load = rss_gb()
 
@@ -32,12 +34,15 @@ def main() -> int:
     out = model.encode(SENTENCES, return_dense=True, return_sparse=True, max_length=emb["max_length"])
     encode_seconds = time.perf_counter() - start
 
-    print(f"model: {emb['model']}  device: {model.model.device}")
+    print(f"model: {emb['model']}  device: {next(model.model.parameters()).device}")
     print(f"load: {load_seconds:.1f}s   encode 3 sentences: {encode_seconds:.2f}s")
     print(f"dense dim: {out['dense_vecs'].shape[1]}")
     for sentence, weights in zip(SENTENCES, out["lexical_weights"]):
         print(f"  sparse tokens={len(weights):3d}  {sentence}")
     print(f"RSS: before={before:.2f} GB  after load={after_load:.2f} GB  after encode={rss_gb():.2f} GB")
+    # On Apple Silicon the weights sit in MPS memory, which RSS does not count.
+    if torch.backends.mps.is_available():
+        print(f"MPS driver memory: {torch.mps.driver_allocated_memory() / 1e9:.2f} GB")
     return 0
 
 
