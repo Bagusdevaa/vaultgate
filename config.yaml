@@ -3,6 +3,32 @@
 paths:
   demo_vault: data/demo-vault
   golden_dir: data/golden
+  reports_dir: reports          # gitignored: reports quote vault content
+
+demo_vault:
+  max_neighbors_per_note: 5
+  skip_folders: [Daily, Handoffs]
+  deny_terms_file: data/deny_terms.txt   # gitignored; see data/deny_terms.example.txt
+  # Cluster "agent infra + PKM tooling", chosen in Phase 1.
+  seeds:
+    - bagusdeva/Projects/hermes-bridge
+    - bagusdeva/Projects/hermes-agent
+    - bagusdeva/Projects/hermi
+    - bagusdeva/Projects/homelab
+    - bagusdeva/Projects/paperclip
+    - bagusdeva/Projects/mira
+    - bagusdeva/Projects/pbpipe
+    - bagusdeva/Projects/personal-brain
+    - bagusdeva/Projects/git-workflow
+    - deva/Projects/hermes
+    - deva/Projects/homelab
+    - deva/Projects/hp-server
+    - deva/Projects/hp-server-homelab
+    - deva/Projects/paperclip
+    - deva/Projects/ode-vps
+    - deva/Projects/pbpipe
+    - deva/Projects/claude-config
+    - deva/Projects/mac-maintenance
 
 embedding:
   model: BAAI/bge-m3
