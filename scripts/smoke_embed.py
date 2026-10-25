@@ -26,6 +26,7 @@ def main() -> int:
 
     start = time.perf_counter()
     embedder = from_config(emb)
+    embedder.model  # load now so load time and encode time are reported separately
     load_seconds = time.perf_counter() - start
     after_load = rss_gb()
 

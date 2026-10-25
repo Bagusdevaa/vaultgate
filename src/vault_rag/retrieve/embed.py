@@ -15,15 +15,24 @@ class Embedder(Protocol):
 
 
 class BgeM3Embedder:
+    """Loads the model on first use, so an index run with nothing to embed costs nothing."""
+
     def __init__(self, model_id: str, use_fp16: bool, max_length: int, batch_size: int = 16):
-        # Imported here so tests and tools that never embed skip loading torch.
-        from FlagEmbedding import BGEM3FlagModel
-
-        from vault_rag.hf import local_model_path
-
-        self.model = BGEM3FlagModel(local_model_path(model_id), use_fp16=use_fp16)
+        self.model_id, self.use_fp16 = model_id, use_fp16
         self.max_length = max_length
         self.batch_size = batch_size
+        self._model = None
+
+    @property
+    def model(self):
+        if self._model is None:
+            # Imported here so tests and tools that never embed skip loading torch.
+            from FlagEmbedding import BGEM3FlagModel
+
+            from vault_rag.hf import local_model_path
+
+            self._model = BGEM3FlagModel(local_model_path(self.model_id), use_fp16=self.use_fp16)
+        return self._model
 
     @property
     def device(self) -> str:
