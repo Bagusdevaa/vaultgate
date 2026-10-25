@@ -1,4 +1,4 @@
-from vault_rag.ingest.parse import resolve_link, wikilinks
+from vault_rag.ingest.parse import note_tags, resolve_link, split_frontmatter, wikilinks
 
 
 def test_plain_alias_heading_and_embed():
@@ -36,3 +36,18 @@ def test_unique_basename_resolves_and_ambiguous_does_not():
     assert resolve_link("ssh", "bagusdeva/Bugs/x", NOTES) == "deva/Knowledge/ssh"
     assert resolve_link("x", "elsewhere/y", NOTES) is None
     assert resolve_link("missing", "deva/Bugs/x", NOTES) is None
+
+
+def test_frontmatter_is_split_from_body():
+    meta, body = split_frontmatter("---\ntype: project\ntags: [a, b]\n---\n# Title\n")
+    assert meta == {"type": "project", "tags": ["a", "b"]}
+    assert body == "# Title\n"
+    assert split_frontmatter("# no frontmatter") == ({}, "# no frontmatter")
+    assert split_frontmatter("---\n: : bad\n---\nbody")[1] == "body"
+
+
+def test_tags_combine_frontmatter_and_inline_without_headings_or_code():
+    meta = {"tags": ["project", "auto-ingest"], "tag": "pbpipe"}
+    body = "# Heading\nwork on #mira and #news\n```sh\n# not a tag #x\n```\nissue #12 and `#y`"
+    assert note_tags(meta, body) == ["project", "auto-ingest", "pbpipe", "mira", "news"]
+    assert note_tags({"tags": "solo"}, "") == ["solo"]
