@@ -1,4 +1,4 @@
-.PHONY: smoke smoke-jev smoke-llm smoke-embed test
+.PHONY: smoke smoke-jev smoke-llm smoke-embed test index
 
 smoke: smoke-jev smoke-llm smoke-embed
 
@@ -13,3 +13,6 @@ smoke-embed:
 
 test:
 	uv run pytest -q
+
+index:
+	uv run python scripts/index_vault.py

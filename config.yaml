@@ -4,6 +4,7 @@ paths:
   demo_vault: data/demo-vault
   golden_dir: data/golden
   reports_dir: reports          # gitignored: reports quote vault content
+  index_dir: data/index         # gitignored: Qdrant data, manifest, graph.json
 
 demo_vault:
   max_neighbors_per_note: 5
@@ -34,6 +35,15 @@ embedding:
   model: BAAI/bge-m3
   use_fp16: false        # fp16 is unreliable on Apple MPS/CPU; revisit on the home server
   max_length: 8192
+
+chunking:                # sizes in characters (~4 per token)
+  min_chars: 200         # shorter sections merge into the next one
+  max_chars: 1800        # 20 chunks stay under Jev's 30 KB request cap
+  overlap_chars: 200
+
+qdrant:
+  collection: vault
+  url: null              # set for the Docker deploy; null = local mode under index_dir
 
 llm:
   base_url: https://openrouter.ai/api/v1
