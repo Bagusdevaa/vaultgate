@@ -13,3 +13,5 @@ flagged_report.md
 
 reports/
 data/deny_terms.txt
+
+data/golden/*.jsonl
