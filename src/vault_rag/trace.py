@@ -70,5 +70,19 @@ class Trace:
     def input_tokens(self) -> int:
         return sum(a.gate.input_tokens for a in self.attempts)
 
+    @property
+    def reason(self) -> str:
+        """One line on why the pipeline answered or abstained."""
+        if not self.attempts:
+            return "no attempt was made"
+        gate, tries = self.attempts[-1].gate, len(self.attempts)
+        if self.status == "answer":
+            return f"{len(self.context)} chunks passed the {self.gate_name} gate"
+        if not any(gate.kept):
+            return f"no chunk passed the {self.gate_name} gate after {tries} attempt(s)"
+        score = "" if gate.sufficiency_score is None else f" (sufficiency {gate.sufficiency_score:.2f})"
+        return f"the kept chunks were not enough to answer{score} after {tries} attempt(s)"
+
     def to_dict(self) -> dict:
-        return asdict(self) | {"cost": self.cost, "input_tokens": self.input_tokens}
+        return asdict(self) | {"cost": self.cost, "input_tokens": self.input_tokens,
+                               "reason": self.reason}

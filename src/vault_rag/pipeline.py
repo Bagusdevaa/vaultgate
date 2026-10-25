@@ -4,6 +4,7 @@
     trace = pipeline.run("why did the gateway mark openrouter unhealthy?")
 """
 
+import copy
 import time
 
 import networkx as nx
@@ -25,6 +26,15 @@ class Pipeline:
         self.client, self.collection = client, collection
         self.embedder, self.graph, self.gate = embedder, graph, gate
         self.settings, self.use_graph = retrieval, use_graph
+
+    def with_options(self, gate: Gate | None = None, use_graph: bool | None = None) -> "Pipeline":
+        """A copy that shares the index, embedder and graph but uses another gate or graph setting."""
+        other = copy.copy(self)
+        if gate is not None:
+            other.gate = gate
+        if use_graph is not None:
+            other.use_graph = use_graph
+        return other
 
     def close(self) -> None:
         # Local-mode Qdrant otherwise closes itself during interpreter shutdown and prints

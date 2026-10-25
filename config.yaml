@@ -53,6 +53,7 @@ llm:
   # Qwen3.6 thinks before answering by default; thinking tokens are billed as output
   # and can use up max_tokens before any answer appears.
   reasoning: false
+  max_tokens: 800
 
 gate:
   type: jev              # jev | bge | none
@@ -79,3 +80,10 @@ retrieval:
   max_retries: 1           # on abstain: retry without filters and with retry_top_k
   retry_top_k: 40
   context_max_chars: 12000 # answer context; Jev's sufficiency question sees the same chunks
+
+api:
+  host: 127.0.0.1        # local only; the home-server deploy decides its own exposure
+  port: 8000
+
+mcp:
+  api_url: http://127.0.0.1:8000   # override with VAULTGATE_API_URL
