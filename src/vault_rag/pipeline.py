@@ -26,6 +26,11 @@ class Pipeline:
         self.embedder, self.graph, self.gate = embedder, graph, gate
         self.settings, self.use_graph = retrieval, use_graph
 
+    def close(self) -> None:
+        # Local-mode Qdrant otherwise closes itself during interpreter shutdown and prints
+        # a traceback.
+        self.client.close()
+
     def run(self, query: str, filters: dict | None = None) -> Trace:
         """First attempt as asked; on abstain, retry without filters and with a larger top_k."""
         start = time.perf_counter()

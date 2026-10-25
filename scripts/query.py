@@ -64,6 +64,7 @@ def main() -> int:
     pipeline = build_pipeline(load_config(), gate=args.gate,
                               use_graph=False if args.no_graph else None)
     trace = pipeline.run(args.query, filters)
+    pipeline.close()
     if args.json:
         print(json.dumps(trace.to_dict(), indent=1, ensure_ascii=False))
     else:
