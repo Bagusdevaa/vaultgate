@@ -1,6 +1,8 @@
-"""Parse Obsidian markdown: wikilinks and how they resolve to notes."""
+"""Parse Obsidian markdown: frontmatter, tags, wikilinks and how links resolve to notes."""
 
 import re
+
+import yaml
 
 FENCE = re.compile(r"^(```|~~~).*?^\1", re.MULTILINE | re.DOTALL)
 INLINE_CODE = re.compile(r"`[^`\n]*`")
@@ -38,3 +40,33 @@ def resolve_link(target: str, source: str, note_ids: set[str]) -> str | None:
             return f"{top}/{target}"
     matches = [n for n in note_ids if n.endswith("/" + target)]
     return matches[0] if len(matches) == 1 else None
+
+
+FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n?", re.DOTALL)
+# `#tag` after whitespace or line start; headings (`# x`) need a space, so they never match.
+INLINE_TAG = re.compile(r"(?<![\w&/#])#([A-Za-z][\w/-]*)")
+
+
+def split_frontmatter(text: str) -> tuple[dict, str]:
+    match = FRONTMATTER.match(text)
+    if not match:
+        return {}, text
+    try:
+        meta = yaml.safe_load(match.group(1))
+    except yaml.YAMLError:
+        meta = None
+    return (meta if isinstance(meta, dict) else {}), text[match.end():]
+
+
+def inline_tags(body: str) -> list[str]:
+    return INLINE_TAG.findall(INLINE_CODE.sub("", FENCE.sub("", body)))
+
+
+def note_tags(meta: dict, body: str) -> list[str]:
+    """Frontmatter `tags` and `tag` plus inline tags, deduplicated in order."""
+    tags = meta.get("tags") or []
+    tags = [tags] if isinstance(tags, str) else list(tags)
+    if meta.get("tag"):
+        tags.append(meta["tag"])
+    tags += inline_tags(body)
+    return list(dict.fromkeys(str(t).lstrip("#") for t in tags))

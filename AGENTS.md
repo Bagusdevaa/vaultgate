@@ -24,4 +24,4 @@ base branch: main
   `flagged_report.md` (Phase 1).
 - Model slugs in `config.yaml` are frozen once evaluation starts.
 - Vault-derived files stay out of git while the repo is public: `data/demo-vault/*`,
-  `reports/`, `data/deny_terms.txt`, and `data/golden/*.jsonl` are gitignored.
+  `reports/`, `data/deny_terms.txt`, `data/golden/*.jsonl`, and `data/index/` are gitignored.

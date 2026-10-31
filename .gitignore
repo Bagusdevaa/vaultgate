@@ -15,3 +15,4 @@ reports/
 data/deny_terms.txt
 
 data/golden/*.jsonl
+data/index/
