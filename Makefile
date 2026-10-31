@@ -1,4 +1,4 @@
-.PHONY: smoke smoke-jev smoke-llm smoke-embed test index
+.PHONY: smoke smoke-jev smoke-llm smoke-embed test index query
 
 smoke: smoke-jev smoke-llm smoke-embed
 
@@ -16,3 +16,7 @@ test:
 
 index:
 	uv run python scripts/index_vault.py
+
+# make query Q="your question" ARGS="--gate bge --no-graph"
+query:
+	uv run python scripts/query.py "$(Q)" $(ARGS)

@@ -72,6 +72,10 @@ gate:
 
 retrieval:
   top_k: 20
+  rrf_k: 60                # standard RRF constant; Qdrant's own default is 2
+  graph: true              # 1-hop expansion through wikilinks and backlinks
   graph_seed_notes: 5
   graph_max_neighbors_per_note: 5
-  max_retries: 1
+  max_retries: 1           # on abstain: retry without filters and with retry_top_k
+  retry_top_k: 40
+  context_max_chars: 12000 # answer context; Jev's sufficiency question sees the same chunks
