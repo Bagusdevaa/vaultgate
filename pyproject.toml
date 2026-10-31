@@ -17,6 +17,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "qdrant-client>=1.20.0",
     "streamlit>=1.66.1",
+    "torch>=2.14.1,<2.15",
     "uvicorn>=0.54.0",
 ]
 
@@ -35,3 +36,13 @@ packages = ["src/vault_rag"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+# Linux (the Docker image) takes CPU-only torch; the default PyPI wheel pulls ~3 GB of CUDA
+# libraries the home server cannot use. macOS keeps the PyPI wheel (MPS).
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
