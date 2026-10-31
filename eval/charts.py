@@ -21,7 +21,8 @@ def grouped_bars(ax, labels: list[str], series: dict[str, list[float]]) -> None:
     ax.set_xticks(range(len(labels)), labels, rotation=20, ha="right")
     ax.set_ylim(0, 1)
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
-    ax.legend(fontsize=8)
+    ax.legend(fontsize=8, ncol=len(series), loc="upper center", bbox_to_anchor=(0.5, -0.22),
+              frameon=False)
     ax.grid(axis="y", alpha=0.3)
 
 
@@ -57,8 +58,11 @@ def cost_chart(path: Path, summary: dict[str, dict]) -> None:
     for name, row in summary.items():
         ax.scatter(row["cost"] * 1000, row["correct"], s=80 if name == MAIN else 40,
                    marker="*" if name == MAIN else "o")
+        # The main system sits next to its no-graph twin; label it below so they don't collide.
         ax.annotate(name, (row["cost"] * 1000, row["correct"]), fontsize=8,
-                    xytext=(5, 4), textcoords="offset points")
+                    xytext=(-40, -14) if name == MAIN else (5, 4), textcoords="offset points")
+    ax.margins(x=0.2, y=0.1)
+    ax.set_xlim(left=0)
     ax.set_xlabel("Cost per query (USD × 1000, gate + generator)")
     ax.set_ylabel("Correct")
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
