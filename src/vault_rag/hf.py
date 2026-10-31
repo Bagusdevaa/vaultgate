@@ -9,3 +9,12 @@ SKIP_PATTERNS = ["onnx/*", "imgs/*", "*.onnx", "*.onnx_data"]
 
 def local_model_path(model_id: str) -> str:
     return snapshot_download(model_id, ignore_patterns=SKIP_PATTERNS)
+
+
+if __name__ == "__main__":
+    # Fetch the configured models into HF_HOME (the Docker deploy runs this once).
+    from vault_rag.config import load_config
+
+    cfg = load_config()
+    for model_id in (cfg["embedding"]["model"], cfg["gate"]["bge"]["model"]):
+        print(model_id, "->", local_model_path(model_id))

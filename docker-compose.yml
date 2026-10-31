@@ -1,0 +1,82 @@
+# vaultgate: Qdrant + API + inspector + indexer, with the vault mounted read-only.
+#
+#   docker compose run --rm -e HF_HUB_OFFLINE=0 indexer python -m vault_rag.hf   # models, once
+#   docker compose up -d --build
+#
+# Ports bind to VAULTGATE_BIND (default 127.0.0.1). On the home server set it to the
+# ZeroTier address; never 0.0.0.0, because Docker's port rules bypass ufw.
+name: vaultgate
+
+x-env: &env
+  VAULTGATE_QDRANT_URL: http://qdrant:6333
+
+x-app: &app
+  image: vaultgate:local
+  build: .
+  restart: unless-stopped
+  env_file:
+    - path: .env          # OPENROUTER_API_KEY; stays on the host, never in the image
+      required: false
+  depends_on:
+    qdrant: {condition: service_healthy}
+
+x-models: &models ${VAULTGATE_MODELS:-./.cache/hf}:/models
+x-index: &index ${VAULTGATE_INDEX:-./data/docker/index}:/app/data/index
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.19.2
+    restart: unless-stopped
+    volumes:
+      - ${VAULTGATE_QDRANT_DATA:-./data/docker/qdrant}:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333'"]
+      interval: 5s
+      retries: 20
+
+  indexer:
+    <<: *app
+    command: ["sh", "scripts/index_loop.sh"]
+    environment:
+      <<: *env
+      INDEX_INTERVAL_SECONDS: ${VAULTGATE_INDEX_INTERVAL:-3600}
+    volumes:
+      - *models
+      - *index
+      - ${VAULTGATE_VAULT:-./data/demo-vault}:/vault:ro
+    healthcheck:   # healthy once the first run has written the graph
+      test: ["CMD", "test", "-f", "/app/data/index/graph.json"]
+      interval: 10s
+      retries: 60
+      start_period: 30s
+
+  api:
+    <<: *app
+    command: ["uvicorn", "--factory", "vault_rag.api:build_app", "--host", "0.0.0.0", "--port", "8000"]
+    environment: *env
+    volumes:
+      - *models
+      - *index
+    ports:
+      - "${VAULTGATE_BIND:-127.0.0.1}:8000:8000"
+    depends_on:
+      qdrant: {condition: service_healthy}
+      indexer: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 15s
+      retries: 20
+      start_period: 60s
+
+  inspector:
+    <<: *app
+    command: ["streamlit", "run", "inspector/app.py", "--server.address", "0.0.0.0",
+              "--server.port", "8501", "--server.headless", "true"]
+    environment:
+      VAULTGATE_API_URL: http://api:8000
+    volumes:
+      - ${VAULTGATE_GOLDEN:-./data/golden}:/app/data/golden:ro   # optional question picker
+    ports:
+      - "${VAULTGATE_BIND:-127.0.0.1}:8501:8501"
+    depends_on:
+      api: {condition: service_healthy}
