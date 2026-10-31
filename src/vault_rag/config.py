@@ -24,6 +24,9 @@ def load_config(config_path: Path | None = None, env_path: Path | None = None) -
     config_path = config_path or REPO_ROOT / "config.yaml"
     load_dotenv(env_path or REPO_ROOT / ".env")
     settings = yaml.safe_load(config_path.read_text())
+    # The Docker deploy points every service at the Qdrant container instead of local mode.
+    if os.getenv("VAULTGATE_QDRANT_URL"):
+        settings["qdrant"]["url"] = os.environ["VAULTGATE_QDRANT_URL"]
     vault = os.getenv("VAULT_SOURCE_PATH")
     return Config(
         settings=settings,
