@@ -2,7 +2,7 @@ import networkx as nx
 from qdrant_client import QdrantClient
 
 from vault_rag import store
-from vault_rag.graph.expand import expand, pick_neighbors, seed_notes
+from vault_rag.graph.expand import expand, link_kind, pick_neighbors, seed_notes
 from vault_rag.retrieve.embed import Embedding
 from vault_rag.trace import Candidate
 
@@ -46,4 +46,13 @@ def test_expand_adds_best_chunk_marked_as_graph():
     by_note = {c.note: c for c in added}
     assert by_note["B"].chunk_id == "B#1"  # the chunk closest to the query, not the first one
     assert by_note["B"].source == "graph" and by_note["B"].via == "P"
+    assert by_note["B"].via_link == "link"
     assert set(by_note) == {"B", "D"}
+
+
+def test_link_kind_names_the_direction():
+    graph = star()
+    graph.add_edge("B", "P")
+    assert link_kind(graph, "P", "D") == "link"
+    assert link_kind(graph, "P", "K2") == "backlink"
+    assert link_kind(graph, "P", "B") == "both"

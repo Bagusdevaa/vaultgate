@@ -31,7 +31,7 @@ def print_attempt(number: int, attempt: Attempt) -> None:
         verdict = "keep" if c.kept else "drop"
         print(f"{i:>3}  {c.source:6}  {fmt(c.dense_rank):>5}  {fmt(c.sparse_rank):>6}  "
               f"{fmt(c.rrf_score or None, '.4f'):>6}  {fmt(c.gate_score, '.3f'):>5}  {verdict:4}  "
-              f"{where(c)}" + (f"   (via {c.via})" if c.via else ""))
+              f"{where(c)}" + (f"   (via {c.via}, {c.via_link})" if c.via else ""))
     gate = attempt.gate
     print(f"gate: kept {sum(gate.kept)}/{len(gate.kept)}  sufficiency {fmt(gate.sufficiency_score, '.3f')}"
           f"  -> {'answer' if gate.sufficient else 'abstain'}   ({gate.note})")

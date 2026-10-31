@@ -74,6 +74,7 @@ def test_jev_gate_merges_batches_in_order_then_asks_sufficiency():
     assert result.kept == [i % 3 == 0 for i in range(9)]
     assert list(seen[-1]["state"]["passages"].values()) == [passages[0], passages[3], passages[6]]
     assert result.sufficient and result.sufficiency_score == 0.8
+    assert result.sufficiency_threshold == 0.5
     assert result.cost == pytest.approx(0.001 * len(seen))
 
 
