@@ -1,0 +1,4 @@
+# Copy to data/deny_terms.txt (gitignored) and list one term per line.
+# Matching is case-insensitive and whole-word. Lines starting with # are ignored.
+Acme Corp
+Project Codename

@@ -10,3 +10,8 @@ data/demo-vault/*
 eval/results/
 flagged_report.md
 .DS_Store
+
+reports/
+data/deny_terms.txt
+
+data/golden/*.jsonl
