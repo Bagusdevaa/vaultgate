@@ -82,3 +82,11 @@ def test_context_is_cut_at_the_budget():
     assert any(c.drop_reason == "kept, but outside the context budget"
                for c in trace.attempts[0].candidates)
     assert trace.to_dict()["status"] == "answer"
+
+
+def test_with_options_shares_resources_but_not_settings():
+    base = make_pipeline(ScriptedGate([True]))
+    other = base.with_options(gate=ScriptedGate([False, False]), use_graph=True)
+    assert other.client is base.client and other.embedder is base.embedder
+    assert other.use_graph and not base.use_graph
+    assert base.run("q").status == "answer" and other.run("q").status == "abstain"
