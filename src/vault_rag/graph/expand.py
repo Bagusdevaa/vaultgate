@@ -19,6 +19,12 @@ def neighbors(graph: nx.DiGraph, note: str) -> set[str]:
     return set(graph.successors(note)) | set(graph.predecessors(note))
 
 
+def link_kind(graph: nx.DiGraph, seed: str, note: str) -> str:
+    """How `note` is connected to `seed`: the seed links to it, it links back, or both."""
+    forward, backward = graph.has_edge(seed, note), graph.has_edge(note, seed)
+    return "both" if forward and backward else "link" if forward else "backlink"
+
+
 def pick_neighbors(graph: nx.DiGraph, seeds: list[str], best: dict[str, tuple[str, float]],
                    cap: int, known_chunks: set[str]) -> list[tuple[str, str]]:
     """(seed, neighbor) pairs, up to `cap` per seed, most query-similar neighbor first.
@@ -68,5 +74,6 @@ def expand(client: QdrantClient, collection: str, graph: nx.DiGraph, candidates:
         payload, score = best[note]
         added.append(Candidate(chunk_id=payload["chunk_id"], note=note,
                                heading_path=payload["heading_path"], text=payload["text"],
-                               source="graph", via=seed, graph_score=score))
+                               source="graph", via=seed, via_link=link_kind(graph, seed, note),
+                               graph_score=score))
     return added

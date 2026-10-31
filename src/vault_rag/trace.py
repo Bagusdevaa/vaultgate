@@ -14,6 +14,7 @@ class Candidate:
     text: str
     source: str                      # "hybrid" or "graph"
     via: str | None = None           # seed note a graph candidate was reached from
+    via_link: str | None = None      # "link" (seed links to it), "backlink" or "both"
     dense_rank: int | None = None    # 1-based; None when absent from that list
     dense_score: float | None = None
     sparse_rank: int | None = None
@@ -36,6 +37,7 @@ class GateResult:
     sufficient: bool
     sufficiency_score: float | None = None
     threshold: float | None = None
+    sufficiency_threshold: float | None = None
     seconds: float = 0.0
     input_tokens: int = 0
     output_tokens: int = 0

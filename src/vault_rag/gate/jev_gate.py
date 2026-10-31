@@ -118,7 +118,8 @@ class JevGate:
     def score(self, query: str, passages: list[str]) -> GateResult:
         start = time.perf_counter()
         result = GateResult(scores=[0.0] * len(passages), kept=[], sufficient=False,
-                            threshold=self.threshold)
+                            threshold=self.threshold,
+                            sufficiency_threshold=self.sufficiency_threshold)
         for batch in byte_batches(query, passages, self.max_request_bytes):
             call = self.client.relevance(query, [passages[i] for i in batch])
             for i, score in zip(batch, call.scores, strict=True):
