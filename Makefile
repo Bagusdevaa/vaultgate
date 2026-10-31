@@ -1,4 +1,4 @@
-.PHONY: smoke smoke-jev smoke-llm smoke-embed test index query serve mcp tune eval report
+.PHONY: smoke smoke-jev smoke-llm smoke-embed test index query serve mcp inspector tune eval report
 
 smoke: smoke-jev smoke-llm smoke-embed
 
@@ -26,6 +26,10 @@ serve:
 
 mcp:
 	uv run python -m vault_rag.mcp_server
+
+# needs the API (make serve); opens on http://127.0.0.1:8501
+inspector:
+	uv run streamlit run inspector/app.py --server.address 127.0.0.1 --server.port 8501
 
 # Thresholds are tuned on dev only; the test run uses the frozen config.
 tune:
