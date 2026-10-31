@@ -1,4 +1,4 @@
-.PHONY: smoke smoke-jev smoke-llm smoke-embed test index query serve mcp
+.PHONY: smoke smoke-jev smoke-llm smoke-embed test index query serve mcp tune eval report
 
 smoke: smoke-jev smoke-llm smoke-embed
 
@@ -26,3 +26,15 @@ serve:
 
 mcp:
 	uv run python -m vault_rag.mcp_server
+
+# Thresholds are tuned on dev only; the test run uses the frozen config.
+tune:
+	uv run python -m eval.tune
+
+# make eval ARGS="--split dev --limit 3"
+eval:
+	uv run python -m eval.run_eval $(ARGS)
+
+# make report RUN=eval/results/<run>
+report:
+	uv run python -m eval.report $(RUN)

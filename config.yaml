@@ -63,13 +63,14 @@ gate:
     threshold: 0.2              # per-chunk P(helps answer) cutoff
     # Sufficiency is its own yes/no question over the kept chunks:
     # P("these chunks are enough to answer") >= this value -> answer, else retry/abstain.
-    sufficiency_threshold: 0.5
+    sufficiency_threshold: 0.5   # dev sweep: 100% decisions from 0.2 to 0.6
     # Requests above ~32 KB of text switch Jev to its slower, less accurate long-context
     # mode, so candidate batches stay under this size.
     max_request_bytes: 30000
   bge:
     model: BAAI/bge-reranker-v2-m3
-    threshold: 0.5
+    # Tuned on dev (eval/tune.py): best decision accuracy, ties broken by gold-in-context.
+    threshold: 0.02
 
 retrieval:
   top_k: 20
