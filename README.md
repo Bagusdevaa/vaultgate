@@ -9,7 +9,7 @@ vaultgate combines three steps:
 
 It runs as an MCP tool inside Claude Code, as a FastAPI `/ask` endpoint, and as a Streamlit inspector that shows every stage.
 
-Final project for Sertifikasi AI Super Class (LLM track). The phase plan is in [`PLAN.md`](PLAN.md).
+Final project for Sertifikasi AI Super Class (LLM track). The phase plan is in [`PLAN.md`](PLAN.md), and the presentation is in the [LinkedIn post](https://lnkd.in/p/eDa3WgE3).
 
 ## The problem
 
@@ -21,6 +21,35 @@ My vault ([PersonalBrain](https://obsidian.md)) collects notes from every Claude
 vaultgate retrieves by meaning and keyword, follows the links, and refuses to answer from weak evidence.
 
 ## Architecture
+
+### System
+
+```mermaid
+flowchart LR
+    subgraph Laptop
+        CC[Claude Code] -- stdio --> MCP[MCP server<br/>search_vault]
+        BR[Browser]
+    end
+    subgraph HS["Home server (Docker Compose)"]
+        API[FastAPI<br/>/search, /ask<br/>bge-m3 + bge-reranker]
+        INS[Streamlit inspector]
+        IDX[Indexer<br/>hourly]
+        QD[(Qdrant<br/>dense + sparse)]
+        GJ[(graph.json<br/>NetworkX links)]
+        DV[/Demo vault<br/>read-only/]
+    end
+    MCP -- HTTP over ZeroTier --> API
+    BR -- ZeroTier --> INS --> API
+    DV --> IDX --> QD
+    IDX --> GJ
+    API --> QD
+    GJ -- loaded at startup --> API
+    API -- Jev Decisions API<br/>Qwen generator --> OR[OpenRouter]
+```
+
+The MCP server is a thin HTTP client, so the models and the index live in one process, the API. Locally, `make serve` and `make inspector` run the same pieces on `127.0.0.1` with Qdrant in local mode. Deployment details are in [`docs/deploy.md`](docs/deploy.md).
+
+### Query flow
 
 ```mermaid
 flowchart LR
@@ -38,7 +67,7 @@ flowchart LR
 |---|---|---|
 | Ingest | Parse frontmatter, headings, wikilinks and tags. Chunk per heading: short sections merge into the next one, long sections split with overlap. Re-embed only notes whose hash changed. | `src/vault_rag/ingest/` |
 | Hybrid search | Dense (cosine) and sparse (lexical weights) top 20 from one Qdrant collection, fused client-side with RRF so each candidate keeps both ranks for the trace. | `retrieve/hybrid.py` |
-| Graph expansion | From the 5 best notes, take linked and backlinking notes (up to 5 per seed). From each neighbor, add only its chunk closest to the query. | `graph/expand.py` |
+| Graph expansion | The indexer stores the wikilink graph as a NetworkX directed graph in `data/index/graph.json`. From the 5 best notes, take linked and backlinking notes (up to 5 per seed). From each neighbor, add only its chunk closest to the query. | `graph/build.py`, `graph/expand.py` |
 | Gate | Jev asks one yes/no question per chunk ("does this passage help answer the query?") in byte-capped batches, then one sufficiency question over the would-be context. A bge-reranker gate and a pass-through gate share the same interface. | `gate/` |
 | Retry / abstain | When the evidence is not sufficient, retry once without filters and with top 40. If that also fails, abstain without calling the LLM. | `pipeline.py` |
 | Generation | Qwen answers only from the context and cites `[note/path.md]` after every claim; invented citations are flagged. | `generate.py` |
