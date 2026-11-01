@@ -51,18 +51,34 @@ The homelab rules shape the deploy:
    rsync -a data/demo-vault/ hp-server:/data/vaultgate/demo-vault/
    rsync -a data/golden/{dev,test}.jsonl hp-server:/data/vaultgate/golden/
    ```
-3. Models: copy them over the LAN instead of downloading them on the home connection:
+3. Models: copy them over the LAN instead of downloading them on the home connection.
+   Copy the shared `hub/blobs/` folder too: some files in the model folders are symlinks
+   into it, and without it the API fails at startup with `IncompleteSnapshotError`.
    ```sh
    rsync -a ~/.cache/huggingface/hub/models--BAAI--bge-m3 ~/.cache/huggingface/hub/models--BAAI--bge-reranker-v2-m3 hp-server:/data/vaultgate/models/hub/
+   rsync -a ~/.cache/huggingface/hub/blobs/ hp-server:/data/vaultgate/models/hub/blobs/
+   ssh hp-server 'chmod -R a+rX /data/vaultgate/models && find /data/vaultgate/models -xtype l'   # no output = no broken links
    ```
-4. Stack: `stacks/vaultgate/compose.yaml` in the homelab repo, through a PR:
+4. Stack: `stacks/vaultgate/` in the homelab repo, through a PR. The app compose file
+   reads its own `.env` next to the app repo, and an `env_file` on `include` is only used
+   for interpolation, so a small override points the API (the only service that calls
+   OpenRouter) at the stack's `.env`:
    ```yaml
-   # vaultgate: RAG over the demo vault. ZeroTier only (VAULTGATE_BIND in .env).
+   # compose.yaml — ZeroTier only (VAULTGATE_BIND in .env); never mount /data/vault.
    include:
-     - path: /data/vaultgate-src/docker-compose.yml
+     - path:
+         - /data/vaultgate-src/docker-compose.yml
+         - secrets.yaml
        env_file: .env
    ```
-   and a gitignored `stacks/vaultgate/.env` (chmod 600), with this content:
+   ```yaml
+   # secrets.yaml
+   services:
+     api:
+       env_file:
+         - path: /data/homelab/stacks/vaultgate/.env
+   ```
+   Then a gitignored `stacks/vaultgate/.env` (chmod 600), with this content:
    ```sh
    OPENROUTER_API_KEY=...
    VAULTGATE_BIND=10.22.82.200
@@ -78,8 +94,17 @@ The homelab rules shape the deploy:
    docker compose ps                        # all services running / healthy
    sudo ss -tlnp | grep -E ':(8000|8501)'   # 10.22.82.200 only, never 0.0.0.0
    ```
-6. Laptop: point the MCP tool at the server by setting `VAULTGATE_API_URL=http://10.22.82.200:8000`
-   in the repo's `.env`. The inspector is at `http://10.22.82.200:8501`.
+   If the first index ran before the models were complete, its vectors are wrong
+   (sparse ranks come back empty). Force a full rebuild:
+   ```sh
+   docker compose run --rm --no-deps indexer sh -c "rm -f /app/data/index/manifest.json && python scripts/index_vault.py --vault /vault"
+   ```
+6. Laptop: register the MCP tool with the server URL. The `-e` value wins over the repo's
+   `.env`, so local runs are unaffected:
+   ```sh
+   claude mcp add vaultgate -s user -e VAULTGATE_API_URL=http://10.22.82.200:8000 -- uv --directory ~/WORK/vault-rag run python -m vault_rag.mcp_server
+   ```
+   The inspector is at `http://10.22.82.200:8501`.
 
 ## Known limits
 
@@ -89,5 +114,6 @@ The homelab rules shape the deploy:
   `docker compose restart api` to pick up the new graph; new chunks are searchable
   right away.
 - Embedding and the bge reranker run on CPU in the container. A full index of the demo
-  vault took 277 s on the Mac's Docker VM (33 s natively on MPS); after that only
-  changed notes are embedded. A Jev-gated `/ask` took 3.6 s end to end.
+  vault took 277 s on the Mac's Docker VM, 184 s on hp-server and 33 s natively on MPS;
+  after that only changed notes are embedded. A Jev-gated `/ask` took 3.6 s end to end
+  on the Mac and 2.7 s on hp-server.
