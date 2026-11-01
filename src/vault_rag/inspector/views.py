@@ -26,8 +26,8 @@ def stage_tables(attempt: dict, gold: set[str]) -> None:
     st.markdown("**Stage 2 · Graph expansion** — best chunk of each linked or backlinking note "
                 "of the top hits.")
     if graph:
-        st.dataframe(pd.DataFrame(graph).style.set_properties(**{"background-color": "#fff8e1"}),
-                     hide_index=True,
+        # A plain table on purpose: a pandas Styler hides the grid lines and checkboxes.
+        st.dataframe(pd.DataFrame(graph), hide_index=True,
                      column_config={"similarity": SCORE, "gate": SCORE})
     else:
         st.caption("No graph candidates (graph off, or every neighbor was already a candidate).")
@@ -42,14 +42,14 @@ def gate_chart(attempt: dict, context_ids: set[str]) -> None:
         return
     bars = alt.Chart(rows).mark_bar().encode(
         x=alt.X("score:Q", scale=alt.Scale(domain=[0, 1]), title="gate score"),
-        y=alt.Y("label:N", sort=None, title=None),
+        y=alt.Y("label:N", sort=None, title=None, axis=alt.Axis(labelOverlap=False, labelLimit=260)),
         color=alt.Color("status:N", scale=STATUS_COLORS, legend=alt.Legend(orient="bottom")),
         tooltip=["label", alt.Tooltip("score:Q", format=".3f"), "status", "source", "reason"])
     layers = [bars]
     if gate["threshold"] is not None:
         layers.append(alt.Chart(pd.DataFrame({"x": [gate["threshold"]]}))
                       .mark_rule(color="#c62828", strokeDash=[4, 3]).encode(x="x:Q"))
-    st.altair_chart(alt.layer(*layers).properties(height=max(160, 18 * len(rows))), width="stretch")
+    st.altair_chart(alt.layer(*layers).properties(height=max(160, 22 * len(rows))), width="stretch")
     threshold = "–" if gate["threshold"] is None else gate["threshold"]
     line = f"Relevance threshold (red line): {threshold}."
     if gate["sufficiency_score"] is not None:
