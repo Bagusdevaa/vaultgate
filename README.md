@@ -81,7 +81,7 @@ claude mcp add vaultgate -s user -- uv --directory ~/WORK/vault-rag run python -
 
 `make inspector` opens one page per query. It shows:
 - **Stage 1:** the hybrid candidates, with dense and sparse ranks and scores and the fused RRF score.
-- **Stage 2:** the graph-added candidates, highlighted, each with the seed note and link direction that brought it in.
+- **Stage 2:** the graph-added candidates in their own table, each with the seed note and link direction that brought it in.
 - **Stage 3:** the gate score of every candidate against the threshold line, with each one marked in context, kept or dropped (and why).
 - **Decision:** a banner saying answer, retry or abstain, with the sufficiency score.
 - **Answer:** the exact context sent to the LLM, then the cited answer.

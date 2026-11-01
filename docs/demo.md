@@ -33,7 +33,7 @@ The question asks, in Indonesian, why the morning digest sends each news item as
 | Evidence | one chunk from `Knowledge/healthchecks.md`, added by graph via the link from `Projects/mira.md` | – |
 | Result | answer on the first try | answers only after the unfiltered retry |
 
-Stage 2 shows the graph row highlighted, with `via bagusdeva/Projects/mira.md`.
+Stage 2 shows the graph row, with `via bagusdeva/Projects/mira.md`.
 
 Why this scenario uses a filter: in this vault, project notes summarize their linked notes, so unfiltered hybrid search usually reaches the answer by itself. The evaluation shows that too (README, "What the numbers say").
 
