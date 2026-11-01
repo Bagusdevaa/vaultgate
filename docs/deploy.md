@@ -95,9 +95,12 @@ The homelab rules shape the deploy:
    sudo ss -tlnp | grep -E ':(8000|8501)'   # 10.22.82.200 only, never 0.0.0.0
    ```
    If the first index ran before the models were complete, its vectors are wrong
-   (sparse ranks come back empty). Force a full rebuild:
+   (sparse ranks come back empty). Force a full rebuild, with the hourly indexer stopped
+   so the two runs cannot write the manifest and the collection at the same time:
    ```sh
+   docker compose stop indexer
    docker compose run --rm --no-deps indexer sh -c "rm -f /app/data/index/manifest.json && python scripts/index_vault.py --vault /vault"
+   docker compose start indexer
    ```
 6. Laptop: register the MCP tool with the server URL. The `-e` value wins over the repo's
    `.env`, so local runs are unaffected:
