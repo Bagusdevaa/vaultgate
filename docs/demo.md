@@ -4,14 +4,14 @@ Start the API and the inspector (`make serve`, `make inspector`), or the Docker 
 (`docker compose up -d`), then open http://127.0.0.1:8501. With the golden files present,
 scenarios 1 and 2 are in the "Golden question" picker.
 
-## 1. Answer with citations: golden d023 (keyword)
+## 1. Answer with citations: golden d034 (semantic)
 
-The question asks why a scheduled script on the Mac cannot find `claude`.
+The question asks, in Indonesian, why the morning digest sends each news item as its own message. The answer exists only in the vault, so general knowledge cannot produce it.
 
 - Mode: single variant, gate `jev`, graph on, generate answer on.
-- Show stage 1: the right note is near the top of both the dense and the sparse list.
-- Show stage 3: about 7 of 20+ chunks pass the red threshold line, and the sufficiency score clears 0.5.
-- The answer explains that launchd runs jobs with an empty PATH, and cites `[bagusdeva/Knowledge/claude-code.md]`. The citation is a gold note.
+- Show stage 3: the chunk from `bagusdeva/Patterns/mira.md` passes the red threshold line, and the sufficiency score clears 0.5.
+- The answer says each item collects its own 👍/👎 reactions, which Mira reads the next morning as feedback, and cites `[bagusdeva/Patterns/mira.md]`. The citation is the gold note.
+- Then switch to compare mode: in the test run, `hybrid (no gate)` said the notes do not cover it and the bge gate abstained. Only the Jev variants ranked the pattern note into the context.
 
 ## 2. Correct abstain: golden d074 (unanswerable)
 
