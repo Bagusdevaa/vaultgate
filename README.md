@@ -102,7 +102,7 @@ Six systems answer the same 60 test questions with the same generator, prompt, t
 | `hybrid_jev_gate` | hybrid + Jev gate |
 | `hybrid_graph_jev_gate` | hybrid + graph expansion + Jev gate (the main system) |
 
-**Golden set:** I wrote 75 questions by hand from the demo vault (keyword, semantic, multi-hop and unanswerable). Every gold note and evidence quote was checked by `scripts/validate_golden.py`. A stratified split gives 15 dev and 60 test questions (keyword 15, semantic 16, multi-hop 15, unanswerable 14).
+**Golden set:** 75 questions from the demo vault (keyword, semantic, multi-hop and unanswerable). An AI drafted them; I reviewed and corrected every one. Every gold note and evidence quote was checked by `scripts/validate_golden.py`. A stratified split gives 15 dev and 60 test questions (keyword 15, semantic 16, multi-hop 15, unanswerable 14).
 
 **Fairness:**
 - Thresholds were tuned on the 15 dev questions only (`make tune`). Jev was correct on every dev decision for any sufficiency threshold from 0.2 to 0.6, so 0.5 stays. The bge threshold moved from 0.5 to 0.02.
@@ -157,6 +157,6 @@ Raw per-question records, CSV, charts and a 20% judge sample for manual checking
 - **Small golden set.** The test set has 60 questions (15 to 16 per category), so a difference of one or two questions moves a rate by 6 to 7 points. Differences of a few percent are not significant.
 - **Jev is a proprietary API** (and OpenRouter's Decisions endpoint is alpha). All Jev code sits in `gate/jev_gate.py` behind the same interface as the open-source bge-reranker gate, so it can be swapped out.
 - **The demo vault is a sanitized subset:** 88 notes from one cluster (agent infrastructure and PKM tooling), reviewed by hand before any text went to an external API. The full vault is larger and more varied.
-- **One author wrote the golden set and the notes.** Questions were written from the notes and validated against them (evidence quotes must appear verbatim). This is realistic for a personal tool, but it is not an independent benchmark.
+- **The golden set is not independent.** An AI drafted the questions from my own notes, and I reviewed and corrected them. They were validated against the notes (evidence quotes must appear verbatim). This is realistic for a personal tool, but it is not an independent benchmark.
 - **The judge is an LLM.** A 20% random sample of its verdicts (65 answers) is exported to `judge_sample.md` for manual checking. Some verdicts are borderline: two of the three bge "hallucinations" partly decline.
 - **The bge gate has no sufficiency signal.** It answers whenever any chunk passes its threshold, so its abstain decisions are weaker by design, not only because of the model.
